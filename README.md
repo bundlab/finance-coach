@@ -24,6 +24,7 @@ A lightweight, terminal-based Java application designed to help users manage the
 ---
 
 ## 📁 Project Structure
+```text
 finance-coach/
 ├── src/main/java/com/financecoach/
 │   ├── Main.java
@@ -34,7 +35,7 @@ finance-coach/
 ├── pom.xml
 ├── README.md
 └── CONTRIBUTING.md
-
+```
 ---
 
 ## Installation & Setup
