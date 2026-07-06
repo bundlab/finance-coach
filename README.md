@@ -58,3 +58,28 @@ mvn clean compile
 
 # Run the application
 mvn exec:java
+```
+## License
+
+This project is licensed under the MIT License.
+
+See the LICENSE file for details.
+
+---
+
+## Author
+bundlab
+
+
+---
+
+## ⭐ Support
+
+If you find this project useful:
+
+* Star the repository
+* Fork the project
+* Report issues
+* Submit improvements
+
+Your support helps improve the project and future AI Powered development efforts.
