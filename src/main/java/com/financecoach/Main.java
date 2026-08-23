@@ -1,5 +1,4 @@
 package com.financecoach;
-
 import com.financecoach.engine.FinanceEngine;
 import java.util.Scanner;
 
@@ -43,6 +42,14 @@ public class Main {
                     String cat = scanner.nextLine(); // Use nextLine to be safe
                     System.out.print("Amount: ");
                     double amt = scanner.nextDouble();
+
+                    if(amt<0)
+                    {
+                        System.out.println("Enter the valid expense amount! ");
+                        scanner.nextLine();
+                        break;
+                    }
+
                     scanner.nextLine(); // Flush buffer
                     coach.addTransaction(cat, amt, "User Expense");
                     System.out.println("Expense logged.");
