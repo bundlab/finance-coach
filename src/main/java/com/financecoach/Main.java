@@ -41,9 +41,20 @@ public class Main {
                 case 2:
                     System.out.print("Category (Needs/Wants/Debt/Savings): ");
                     String cat = scanner.nextLine(); // Use nextLine to be safe
-                    System.out.print("Amount: ");
-                    double amt = scanner.nextDouble();
-                    scanner.nextLine(); // Flush buffer
+                    double amt;
+
+                    while (true) {
+                        System.out.print("Amount: ");
+                        amt = scanner.nextDouble();
+                        scanner.nextLine(); // Flush buffer
+
+                        if (amt > 0) {
+                            break;
+                        }
+
+                        System.out.println("Invalid amount. Expense must be greater than 0.");
+                    }
+
                     coach.addTransaction(cat, amt, "User Expense");
                     System.out.println("Expense logged.");
                     break;
