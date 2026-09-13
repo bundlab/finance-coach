@@ -1,67 +1,96 @@
 package com.financecoach;
-import com.financecoach.engine.FinanceEngine;
+
 import java.util.Scanner;
+
+import com.financecoach.engine.FinanceEngine;
+import com.financecoach.repository.TransactionRepository;
+import com.financecoach.utils.InputUtils;
 
 public class Main {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        FinanceEngine coach = new FinanceEngine();
-        
-        System.out.println("Welcome to your AI Personal Finance Coach!");
+        try (
+            InputUtils input = new InputUtils(new Scanner(System.in))
+        ) {
+            TransactionRepository repository = new TransactionRepository();
+            FinanceEngine coach = new FinanceEngine(repository);
 
-        while (true) {
-            System.out.println("\n--- MENU ---");
-            System.out.println("1. Add Income");
-            System.out.println("2. Add Expense (Needs, Wants, Debt, Savings)");
-            System.out.println("3. Get AI Coaching Report");
-            System.out.println("4. Exit");
-            System.out.print("Choose an option: ");
-            
-            // Check if the input is actually a number to prevent crashes
-            if (!scanner.hasNextInt()) {
-                System.out.println("Please enter a number (1-4).");
-                scanner.next(); // clear invalid input
-                continue;
-            }
+            System.out.println(
+                "Welcome to your AI Personal Finance Coach!"
+            );
 
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // IMPORTANT: This "flushes" the Enter key from the buffer
+            while (true) {
+                System.out.println("\n--- MENU ---");
+                System.out.println("1. Add Income");
+                System.out.println(
+                    "2. Add Expense (Needs, Wants, Debt, Savings)"
+                );
+                System.out.println("3. Get AI Coaching Report");
+                System.out.println("4. Exit");
 
-            if (choice == 4) break;
+                int choice = input.askInt(
+                    "Choose an option: ",
+                    "Please enter a number (1-4)."
+                );
 
-            switch (choice) {
-                case 1:
-                    System.out.print("Enter Income Amount: ");
-                    double inc = scanner.nextDouble();
-                    scanner.nextLine(); // Flush buffer
-                    coach.addTransaction("Income", inc, "Monthly Salary");
-                    System.out.println("Income added successfully!");
+                if (choice == 4) {
                     break;
-                case 2:
-                    System.out.print("Category (Needs/Wants/Debt/Savings): ");
-                    String cat = scanner.nextLine(); // Use nextLine to be safe
-                    System.out.print("Amount: ");
-                    double amt = scanner.nextDouble();
+                }
 
-                    if(amt<0)
-                    {
-                        System.out.println("Enter the valid expense amount! ");
-                        scanner.nextLine();
-                        break;
+                switch (choice) {
+                    case 1 -> {
+                        double amount = input.askDouble(
+                            "Enter Income Amount: "
+                        );
+
+                        coach.addTransaction(
+                            "Income",
+                            amount,
+                            "Monthly Salary"
+                        );
+
+                        System.out.println(
+                            "Income added successfully!"
+                        );
                     }
 
-                    scanner.nextLine(); // Flush buffer
-                    coach.addTransaction(cat, amt, "User Expense");
-                    System.out.println("Expense logged.");
-                    break;
-                case 3:
-                    coach.generateCoachingReport();
-                    break;
-                default:
-                    System.out.println("Invalid choice. Try 1-4.");
+                    case 2 -> {
+                        String category = input.askString(
+                            "Category (Needs/Wants/Debt/Savings): "
+                        );
+
+                        double amount = input.askDouble(
+                            "Amount: ",
+                            "Please enter a valid expense amount."
+                        );
+
+                        if (amount < 0) {
+                            System.out.println(
+                                "Enter a valid expense amount!"
+                            );
+                            break;
+                        }
+
+                        coach.addTransaction(
+                            category,
+                            amount,
+                            "User Expense"
+                        );
+
+                        System.out.println("Expense logged.");
+                    }
+
+                    case 3 -> coach.generateCoachingReport();
+
+                    default ->
+                        System.out.println(
+                            "Invalid choice. Try 1-4."
+                        );
+                }
             }
+
+            System.out.println(
+                "Stay financially healthy! Goodbye."
+            );
         }
-        scanner.close();
-        System.out.println("Stay financially healthy! Goodbye.");
     }
 }
