@@ -28,10 +28,16 @@ A lightweight, terminal-based Java application designed to help users manage the
 finance-coach/
 ├── src/main/java/com/financecoach/
 │   ├── Main.java
-│   ├── engine/          # Business logic & AI analysis
-│   └── model/           # Data models (Transaction, Budget, etc.)
+│   ├── engine/
+│   │   └── FinanceEngine.java
+│   ├── model/
+│   │   └── Transaction.java
+│   ├── repository/
+│   │   └── TransactionRepository.java
+│   └── utils/
+│       └── InputUtils.java
 ├── src/main/resources/
-│   └── finance_data.csv     # Persistent storage
+│   └── finance_data.csv
 ├── pom.xml
 ├── README.md
 └── CONTRIBUTING.md
