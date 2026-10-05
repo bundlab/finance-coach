@@ -57,7 +57,12 @@ public class Main {
                             "Enter Income Amount: "
                         );
 
-                       
+                        if (amount < 0) {
+                            System.out.println(
+                                "Please enter a valid income amount."
+                            );
+                            break;
+                        }
 
                         coach.addTransaction(
                             "Income",
