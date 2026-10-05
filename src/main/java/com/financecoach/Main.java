@@ -4,43 +4,60 @@ import java.util.Scanner;
 
 import com.financecoach.engine.FinanceEngine;
 import com.financecoach.repository.TransactionRepository;
+import com.financecoach.service.ExportService;
 import com.financecoach.utils.InputUtils;
 
 public class Main {
+
     public static void main(String[] args) {
+
         try (
             InputUtils input = new InputUtils(new Scanner(System.in))
         ) {
-            TransactionRepository repository = new TransactionRepository();
-            FinanceEngine coach = new FinanceEngine(repository);
+
+            TransactionRepository repository =
+                new TransactionRepository();
+
+            FinanceEngine coach =
+                new FinanceEngine(repository);
+
+            ExportService exporter =
+                new ExportService();
 
             System.out.println(
                 "Welcome to your AI Personal Finance Coach!"
             );
 
             while (true) {
+
                 System.out.println("\n--- MENU ---");
                 System.out.println("1. Add Income");
                 System.out.println(
                     "2. Add Expense (Needs, Wants, Debt, Savings)"
                 );
                 System.out.println("3. Get AI Coaching Report");
-                System.out.println("4. Exit");
+                System.out.println("4. Export Monthly Summary");
+                System.out.println("5. Exit");
 
                 int choice = input.askInt(
                     "Choose an option: ",
-                    "Please enter a number (1-4)."
+                    "Please enter a number (1-5)."
                 );
 
-                if (choice == 4) {
+                // ONLY option 5 should exit
+                if (choice == 5) {
                     break;
                 }
 
                 switch (choice) {
+
                     case 1 -> {
+
                         double amount = input.askDouble(
                             "Enter Income Amount: "
                         );
+
+                       
 
                         coach.addTransaction(
                             "Income",
@@ -54,6 +71,7 @@ public class Main {
                     }
 
                     case 2 -> {
+
                         String category = input.askString(
                             "Category (Needs/Wants/Debt/Savings): "
                         );
@@ -76,15 +94,29 @@ public class Main {
                             "User Expense"
                         );
 
-                        System.out.println("Expense logged.");
+                        System.out.println(
+                            "Expense logged."
+                        );
                     }
 
-                    case 3 -> coach.generateCoachingReport();
+                    case 3 -> {
 
-                    default ->
-                        System.out.println(
-                            "Invalid choice. Try 1-4."
+                        coach.generateCoachingReport();
+                    }
+
+                    case 4 -> {
+
+                        exporter.exportMonthlySummary(
+                            coach.getTransactions()
                         );
+                    }
+
+                    default -> {
+
+                        System.out.println(
+                            "Invalid choice. Try 1-5."
+                        );
+                    }
                 }
             }
 

@@ -106,4 +106,9 @@ public class FinanceEngine {
             .mapToDouble(Transaction::getAmount)
             .sum();
     }
+    
+     public List<Transaction> getTransactions() {
+        return transactions;
+    }
 }
+
