@@ -9,6 +9,10 @@ import com.financecoach.model.MonthlyReport;
 import com.financecoach.repository.TransactionRepository;
 import com.financecoach.service.ExportService;
 import com.financecoach.utils.InputUtils;
+import java.time.LocalDate;
+import java.util.List;
+
+import com.financecoach.model.Transaction;
 
 public class Main {
 
@@ -41,14 +45,15 @@ public class Main {
                 System.out.println("3. Get AI Coaching Report");
                 System.out.println("4. View/Export Monthly Text Report");
                 System.out.println("5. Export Transactions CSV");
-                System.out.println("6. Exit");
+                System.out.println("6. View Transaction History");
+                System.out.println("7. Exit");
 
                 int choice = input.askInt(
                     "Choose an option: ",
-                    "Please enter a number (1-6)."
+                    "Please enter a number (1-7)."
                 );
 
-                if (choice == 6) {
+                if (choice == 7) {
                     break;
                 }
 
@@ -143,6 +148,8 @@ public class Main {
                         );
                     }
 
+                    case 6-> viewTransactionHistory(input,coach);
+
                     default -> {
 
                         System.out.println(
@@ -157,6 +164,97 @@ public class Main {
             );
         }
     }
+
+
+    private static void viewTransactionHistory(
+            InputUtils input,
+            FinanceEngine coach
+    ) {
+        System.out.println("\n--- TRANSACTION HISTORY ---");
+        System.out.println(
+                "Categories: Income, Needs, Wants, Savings, Debt"
+        );
+
+        String category = input.askString(
+                "Category (leave blank for all): "
+        );
+
+        if (!category.isBlank()
+                && !List.of(
+                "Income", "Needs", "Wants", "Savings", "Debt"
+        ).stream().anyMatch(c -> c.equalsIgnoreCase(category))) {
+            System.out.println("Invalid category. Returning to menu.");
+            return;
+        }
+
+        LocalDate startDate = askOptionalDate(
+                input, "Start date (YYYY-MM-DD, blank for none): "
+        );
+        LocalDate endDate = askOptionalDate(
+                input, "End date (YYYY-MM-DD, blank for none): "
+        );
+
+        if (startDate != null && endDate != null
+                && startDate.isAfter(endDate)) {
+            System.out.println(
+                    "Start date cannot be after the end date."
+            );
+            return;
+        }
+
+        List<Transaction> history = coach.getTransactionHistory(
+                category, startDate, endDate
+        );
+
+        if (history.isEmpty()) {
+            System.out.println("No transactions found.");
+            return;
+        }
+
+        System.out.printf(
+                "%-12s %-12s %12s  %s%n",
+                "Date", "Category", "Amount", "Description"
+        );
+        System.out.println("-".repeat(75));
+
+        for (Transaction transaction : history) {
+            String date = transaction.getDate() == null
+                    ? "Unknown"
+                    : transaction.getDate().toString();
+
+            System.out.printf(
+                    "%-12s %-12s %12.2f  %s%n",
+                    date,
+                    transaction.getCategory(),
+                    transaction.getAmount(),
+                    transaction.getDescription()
+            );
+        }
+
+        System.out.println("\nTotal transactions: " + history.size());
+    }
+
+    private static LocalDate askOptionalDate(
+            InputUtils input,
+            String prompt
+    ) {
+        while (true) {
+            String value = input.askString(prompt);
+
+            if (value.isBlank()) {
+                return null;
+            }
+
+            try {
+                return LocalDate.parse(value);
+            } catch (DateTimeParseException e) {
+                System.out.println(
+                        "Invalid date. Use YYYY-MM-DD, or leave blank."
+                );
+            }
+        }
+    }
+
 
     private static YearMonth askReportMonth(InputUtils input) {
         while (true) {
