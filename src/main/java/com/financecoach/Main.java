@@ -3,7 +3,7 @@ package com.financecoach;
 import java.util.Scanner;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
-
+import com.financecoach.model.BudgetRule;
 import com.financecoach.engine.FinanceEngine;
 import com.financecoach.model.MonthlyReport;
 import com.financecoach.repository.TransactionRepository;
@@ -45,15 +45,19 @@ public class Main {
                 System.out.println("3. Get AI Coaching Report");
                 System.out.println("4. View/Export Monthly Text Report");
                 System.out.println("5. Export Transactions CSV");
-                System.out.println("6. View Transaction History");
-                System.out.println("7. Exit");
+
+                              System.out.println("6. View Transaction History");
+                System.out.println("7. Configure Budget Rules");
+                System.out.println("8. Reset Budget Rules to Default (50/30/20)");
+                System.out.println("9. Exit");
 
                 int choice = input.askInt(
                     "Choose an option: ",
-                    "Please enter a number (1-7)."
+                    "Please enter a number (1-9)."
                 );
 
-                if (choice == 7) {
+                if (choice == 9) {
+
                     break;
                 }
 
@@ -120,7 +124,7 @@ public class Main {
                     case 4 -> {
                         YearMonth month = askReportMonth(input);
                         MonthlyReport report = coach.generateMonthlyReport(month);
-                        String reportText = exporter.renderMonthlyReport(report);
+                        String reportText = exporter.renderMonthlyReport(report, coach.getBudgetRule());
                         System.out.print(reportText);
 
                         String saveReport = input.askString(
@@ -148,12 +152,50 @@ public class Main {
                         );
                     }
 
-                    case 6-> viewTransactionHistory(input,coach);
 
+                                      case 6 -> viewTransactionHistory(input, coach);
+
+                    case 7 -> {
+                        System.out.println("\n--- CONFIGURE BUDGET RULES ---");
+
+                        double needs = input.askDouble("Needs target (%): ");
+                        double wants = input.askDouble("Wants target (%): ");
+                        double savings = input.askDouble("Savings target (%): ");
+
+                        try {
+                            BudgetRule rule = new BudgetRule(needs, wants, savings);
+                            coach.updateBudgetRule(rule);
+
+                            System.out.println(
+                                "Custom budget rules saved successfully!"
+                            );
+                        } catch (IllegalArgumentException e) {
+                            System.out.println(
+                                "Invalid budget rules: " + e.getMessage()
+                            );
+                        } catch (IllegalStateException e) {
+                            System.out.println(
+                                "Could not save budget rules: " + e.getMessage()
+                            );
+                        }
+                    }
+
+                    case 8 -> {
+                        try {
+                            coach.resetBudgetRule();
+                            System.out.println(
+                                "Budget rules reset to the default 50/30/20."
+                            );
+                        } catch (IllegalStateException e) {
+                            System.out.println(
+                                "Could not reset budget rules: " + e.getMessage()
+                            );
+                        }
+                    }
                     default -> {
 
                         System.out.println(
-                            "Invalid choice. Try 1-5."
+                            "Invalid choice. Try 1-9."
                         );
                     }
                 }
