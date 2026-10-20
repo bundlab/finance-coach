@@ -3,6 +3,8 @@ package com.financecoach.engine;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.YearMonth;
+import java.time.LocalDate;
+import java.util.Comparator;
 
 import com.financecoach.model.MonthlyReport;
 import com.financecoach.model.Transaction;
@@ -97,6 +99,36 @@ public class FinanceEngine {
                 + "perfectly. You're a financial pro!"
             );
         }
+    }
+
+    public List<Transaction> getTransactionHistory(
+            String category,
+            LocalDate startDate,
+            LocalDate endDate
+    ) {
+        return transactions.stream()
+                .filter(transaction ->
+                        category == null
+                                || category.isBlank()
+                                || category.equalsIgnoreCase(transaction.getCategory())
+                )
+                .filter(transaction -> {
+                    LocalDate date = transaction.getDate();
+
+                    if (date == null) {
+                        return startDate == null && endDate == null;
+                    }
+
+                    return (startDate == null || !date.isBefore(startDate))
+                            && (endDate == null || !date.isAfter(endDate));
+                })
+                .sorted(
+                        Comparator.comparing(
+                                Transaction::getDate,
+                                Comparator.nullsLast(Comparator.reverseOrder())
+                        )
+                )
+                .toList();
     }
 
     public MonthlyReport generateMonthlyReport(YearMonth month) {
