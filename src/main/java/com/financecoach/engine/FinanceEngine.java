@@ -1,5 +1,6 @@
 package com.financecoach.engine;
-
+import com.financecoach.model.BudgetRule;
+import com.financecoach.repository.BudgetRuleRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.YearMonth;
@@ -13,17 +14,28 @@ import com.financecoach.repository.TransactionRepository;
 public class FinanceEngine {
     private final List<Transaction> transactions = new ArrayList<>();
     private final TransactionRepository repository;
+    private final BudgetRuleRepository budgetRuleRepository;
+    private BudgetRule budgetRule;
+   public FinanceEngine(TransactionRepository repository) {
+    this(repository, new BudgetRuleRepository());
+}
 
-    public FinanceEngine(TransactionRepository repository) {
-        this.repository = repository;
-        transactions.addAll(repository.load());
+public FinanceEngine(
+    TransactionRepository repository,
+    BudgetRuleRepository budgetRuleRepository
+) {
+    this.repository = repository;
+    this.budgetRuleRepository = budgetRuleRepository;
+    this.budgetRule = budgetRuleRepository.load();
 
-        System.out.println(
-            "Coach: History loaded. "
-                + transactions.size()
-                + " records found."
-        );
-    }
+    transactions.addAll(repository.load());
+
+    System.out.println(
+        "Coach: History loaded. "
+            + transactions.size()
+            + " records found."
+    );
+}
 
     public void addTransaction(
         String category,
@@ -72,19 +84,44 @@ public class FinanceEngine {
         // * 3. The "AI" Coaching Logic (Heuristics)
         System.out.println("\n--- COACH'S ADVICE ---");
 
-        if (needsPct > 50) {
-            System.out.println(
-                "-> [ALERT] Your 'Needs' are over 50%. "
-                + "Look for ways to reduce fixed costs."
-            );
-        }
+        double needsTarget = budgetRule.needs();
+double wantsTarget = budgetRule.wants();
+double savingsTarget = budgetRule.savings();
 
-        if (wantsPct > 30) {
-            System.out.println(
-                "-> [ADVICE] You're spending heavily on 'Wants'. "
-                + "Try the 48-hour rule before buying non-essentials."
-            );
-        }
+if (needsPct > needsTarget) {
+System.out.printf(
+"-> [ALERT] Your 'Needs' are over your %.1f%% target. "
++ "Look for ways to reduce fixed costs.%n",
+needsTarget
+);
+}
+
+if (wantsPct > wantsTarget) {
+System.out.printf(
+"-> [ADVICE] You're spending heavily on 'Wants'. "
++ "Your target is %.1f%%. Try the 48-hour rule "
++ "before buying non-essentials.%n",
+wantsTarget
+);
+}
+
+if (savingsPct < savingsTarget) {
+System.out.printf(
+"-> [STRATEGY] You're below your %.1f%% savings goal. "
++ "Try to automate a small transfer to savings today.%n",
+savingsTarget
+);
+}
+
+if (needsPct <= needsTarget
+&& wantsPct <= wantsTarget
+&& savingsPct >= savingsTarget) {
+System.out.println(
+"-> [EXCELLENT] You are following your custom budget "
++ "rule perfectly. You're a financial pro!"
+);
+}
+
 
         if (savingsPct < 20) {
             System.out.println(
@@ -202,5 +239,20 @@ public class FinanceEngine {
      public List<Transaction> getTransactions() {
         return transactions;
     }
+    public void updateBudgetRule(BudgetRule newRule) {
+budgetRuleRepository.save(newRule);
+budgetRule = newRule;
+}
+
+public void resetBudgetRule() {
+BudgetRule defaultRule = BudgetRule.defaultRule();
+budgetRuleRepository.save(defaultRule);
+budgetRule = defaultRule;
+}
+
+public BudgetRule getBudgetRule() {
+return budgetRule;
+}
+
 }
 
